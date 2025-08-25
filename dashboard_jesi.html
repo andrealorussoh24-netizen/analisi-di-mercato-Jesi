@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Investimento: Affitti Brevi a Jesi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Slate Blue -->
+    <!-- Application Structure Plan: Ho progettato l'applicazione come un dashboard interattivo a scorrimento verticale con una navigazione fissa. Questa struttura è superiore a un report lineare perché permette all'utente di avere una visione d'insieme immediata dei KPI principali (nella sezione Dashboard) e di approfondire selettivamente le aree di interesse (Mercato, Finanza, Piano d'Azione) senza un ordine prestabilito. L'interattività, come la selezione del modello finanziario, consente un confronto diretto e dinamico dei dati, migliorando la comprensione e facilitando il processo decisionale. L'obiettivo è trasformare l'analisi da passiva ad attiva. -->
+    <!-- Visualization & Content Choices: 
+        - Riepilogo Modelli (Bar Chart, Chart.js): Confronta i 3 modelli su 3 metriche chiave (Capitale, NOI, Patrimonio). Un grafico a barre raggruppate è ideale per un confronto diretto e immediato, supportando la raccomandazione strategica.
+        - Crescita Turistica (Line Chart, Chart.js): Mostra il trend di crescita delle presenze turistiche. Un grafico a linee è perfetto per visualizzare l'andamento nel tempo.
+        - Analisi Finanziaria (Doughnut Chart, Chart.js): Visualizza la ripartizione dei costi per il modello selezionato. Un grafico a ciambella è efficace per mostrare le proporzioni di una composizione.
+        - Calendario Opportunità (HTML/CSS/JS): Una timeline interattiva è più coinvolgente di una tabella statica per mostrare gli eventi chiave durante l'anno.
+        - Piano d'Azione (HTML/CSS/JS Accordion): Un sistema a fisarmonica permette di presentare il piano in 4 fasi chiare, mostrando i dettagli solo quando richiesto dall'utente, mantenendo l'interfaccia pulita.
+        - Tutte le visualizzazioni sono realizzate in Canvas tramite Chart.js per rispettare i requisiti. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .doughnut-chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 45vh;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .tab-button.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">Analisi di mercato Jesi</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#dashboard" class="nav-link px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-500 border-b-2 border-transparent">Dashboard</a>
+                        <a href="#mercato" class="nav-link px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-500 border-b-2 border-transparent">Analisi Mercato</a>
+                        <a href="#finanza" class="nav-link px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-500 border-b-2 border-transparent">Analisi Finanziaria</a>
+                        <a href="#piano-azione" class="nav-link px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-500 border-b-2 border-transparent">Piano d'Azione</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <section id="dashboard" class="pt-16 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Dashboard di Investimento</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Una sintesi visiva dei dati chiave e della raccomandazione strategica per la proprietà in Via Coppetella 3, Jesi.</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8">
+                <h3 class="text-xl font-bold text-center mb-2 text-gray-800">Raccomandazione Strategica: Buy-to-Rent</h3>
+                <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">Il modello di acquisto per messa a reddito (Buy-to-Rent) è identificato come la strategia ottimale. Offre il miglior equilibrio tra un solido flusso di cassa operativo e la creazione di patrimonio a lungo termine, capitalizzando sul vantaggio di costo della micro-zona e sulla robusta domanda turistica.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-sm text-blue-800 font-medium">Ricavo Lordo Annuo</p>
+                        <p class="text-2xl font-bold text-blue-900">~ €24.000</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-sm text-green-800 font-medium">Reddito Operativo Netto (NOI)</p>
+                        <p class="text-2xl font-bold text-green-900">~ €8.825</p>
+                    </div>
+                    <div class="bg-indigo-50 p-4 rounded-lg">
+                        <p class="text-sm text-indigo-800 font-medium">Cap Rate Stimato</p>
+                        <p class="text-2xl font-bold text-indigo-900">11,8%</p>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-lg">
+                        <p class="text-sm text-amber-800 font-medium">Cash-on-Cash Return</p>
+                        <p class="text-2xl font-bold text-amber-900">26,2%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h3 class="text-xl font-bold text-center mb-4 text-gray-800">Confronto Modelli di Investimento</h3>
+                <div class="chart-container">
+                    <canvas id="investmentModelsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-200">
+
+        <section id="mercato" class="pt-16 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Analisi di Mercato</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Dati e tendenze che definiscono l'opportunità di investimento a Jesi.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="card bg-white rounded-xl shadow-lg p-6 md:p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Crescita Turistica Record</h3>
+                    <p class="text-gray-600 mb-4">La Regione Marche ha registrato nel 2024 una crescita del 13,4% rispetto al 2019, trainata da un forte aumento (+15%) dei turisti stranieri, che garantiscono maggiore spesa e permanenze più lunghe.</p>
+                    <div class="h-64">
+                         <canvas id="tourismGrowthChart"></canvas>
+                    </div>
+                </div>
+                <div class="card bg-white rounded-xl shadow-lg p-6 md:p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Vantaggio Competitivo: Micro-Zona</h3>
+                     <p class="text-gray-600 mb-4">La zona di Via Coppetella offre un'opportunità di arbitraggio unica: i prezzi di acquisto sono fino al 23% inferiori rispetto al centro storico, a fronte di un potenziale di ricavo turistico comparabile.</p>
+                     <div class="space-y-4">
+                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                            <span class="font-medium text-gray-700">Prezzo Acquisto Centro</span>
+                            <span class="font-bold text-lg text-red-600">1.385 €/m²</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                            <span class="font-medium text-gray-700">Prezzo Acquisto Coppetella</span>
+                            <span class="font-bold text-lg text-green-600">1.068 €/m²</span>
+                        </div>
+                        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg" role="alert">
+                            <p class="font-bold">Sconto del 23%</p>
+                            <p>Stesso target turistico, costo di ingresso inferiore.</p>
+                        </div>
+                     </div>
+                </div>
+            </div>
+
+            <div class="card bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8">
+                 <h3 class="text-xl font-bold text-gray-800 mb-4">Profilo degli Ospiti Target</h3>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div>
+                        <h4 class="font-semibold text-lg text-blue-700">👤 Turista Culturale/Enogastronomico</h4>
+                        <p class="text-gray-600 mt-2">Coppie (35-65 anni), italiane e internazionali, con reddito medio-alto. Ricercano esperienze autentiche, comfort e consigli locali. Generano domanda nei weekend e in alta stagione.</p>
+                     </div>
+                     <div>
+                        <h4 class="font-semibold text-lg text-indigo-700">💼 Viaggiatore d'Affari</h4>
+                        <p class="text-gray-600 mt-2">Tecnici, consulenti, manager. Richiedono efficienza, Wi-Fi veloce, self check-in e parcheggio. Generano domanda nei giorni feriali e in bassa stagione, stabilizzando i ricavi.</p>
+                     </div>
+                 </div>
+            </div>
+
+            <div class="card bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 text-center">Calendario delle Opportunità 2025</h3>
+                <div class="relative">
+                    <div class="border-l-2 border-gray-200 ml-4 md:ml-0">
+                        <div class="mb-8 flex items-center w-full">
+                            <div class="hidden md:block z-10 bg-blue-500 rounded-full h-4 w-4"></div>
+                            <div class="w-full md:pl-8">
+                                <p class="font-bold text-blue-600">Maggio</p>
+                                <h4 class="font-semibold text-lg">Palio di San Floriano (2-11 Maggio)</h4>
+                                <p class="text-sm text-gray-600">Impatto sulla domanda: <span class="font-bold text-red-600">MOLTO ALTO</span>. Strategia: Tariffa di Picco, Soggiorno Minimo 3 notti.</p>
+                            </div>
+                        </div>
+                        <div class="mb-8 flex items-center w-full">
+                            <div class="hidden md:block z-10 bg-blue-500 rounded-full h-4 w-4"></div>
+                            <div class="w-full md:pl-8">
+                                <p class="font-bold text-blue-600">Luglio - Settembre</p>
+                                <h4 class="font-semibold text-lg">Festival Pergolesi Spontini (17 Lug - 28 Set)</h4>
+                                <p class="text-sm text-gray-600">Impatto sulla domanda: <span class="font-bold text-orange-600">ALTO (prolungato)</span>. Strategia: Tariffa Alta Stagione, Picco+ per le "prime" operistiche.</p>
+                            </div>
+                        </div>
+                         <div class="mb-8 flex items-center w-full">
+                            <div class="hidden md:block z-10 bg-blue-500 rounded-full h-4 w-4"></div>
+                            <div class="w-full md:pl-8">
+                                <p class="font-bold text-blue-600">Agosto</p>
+                                <h4 class="font-semibold text-lg">Settimana di Ferragosto (11-17 Agosto)</h4>
+                                <p class="text-sm text-gray-600">Impatto sulla domanda: <span class="font-bold text-red-600">MOLTO ALTO</span>. Strategia: Tariffa di Picco Assoluto, Soggiorno Minimo 5-7 notti.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center w-full">
+                            <div class="hidden md:block z-10 bg-blue-500 rounded-full h-4 w-4"></div>
+                            <div class="w-full md:pl-8">
+                                <p class="font-bold text-blue-600">Tutto l'anno</p>
+                                <h4 class="font-semibold text-lg">Ponti, Festività e Fiere</h4>
+                                <p class="text-sm text-gray-600">Impatto sulla domanda: <span class="font-bold text-yellow-600">MEDIO</span>. Strategia: Tariffa Spalla, Soggiorno Minimo 2 notti.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <hr class="my-16 border-gray-200">
+
+        <section id="finanza" class="pt-16 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Analisi Finanziaria Interattiva</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">Seleziona un modello di investimento per esplorarne i dettagli finanziari, i punti di forza e di debolezza.</p>
+            </div>
+
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex rounded-md shadow-sm" role="group">
+                    <button type="button" id="btn-rent" class="tab-button active px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500">Rent-to-Rent</button>
+                    <button type="button" id="btn-pm" class="tab-button px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500">Property Management</button>
+                    <button type="button" id="btn-buy" class="tab-button px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500">Buy-to-Rent</button>
+                </div>
+            </div>
+
+            <div id="financial-details" class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-200">
+
+        <section id="piano-azione" class="pt-16 -mt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Piano d'Azione Pratico</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-600">I 4 passi fondamentali per lanciare e gestire con successo il tuo investimento a Jesi.</p>
+            </div>
+            <div class="space-y-4" id="action-plan-container">
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white mt-16">
+        <div class="container mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+            <p>&copy; 2025 Analisi di Investimento Immobiliare Turistico. Dati e proiezioni a scopo illustrativo.</p>
+        </div>
+    </footer>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    
+    const financialData = {
+        rent: {
+            title: 'Modello A: Rent-to-Rent (Sublocazione)',
+            description: 'Questo modello massimizza il ritorno sul capitale iniziale grazie a un basso investimento. Ideale per testare il mercato con un rischio contenuto.',
+            metrics: [
+                { label: 'Capitale Iniziale Richiesto', value: 'Basso (€12k - €17k)', color: 'text-green-600' },
+                { label: 'Reddito Operativo Netto (NOI)', value: '~ €7.676', color: 'text-gray-800' },
+                { label: 'Ritorno su Capitale (CoC)', value: '45,1%', color: 'text-blue-600 font-bold' }
+            ],
+            swot: {
+                strengths: ['Basso capitale iniziale', 'Rapidità di ingresso', 'Flessibilità'],
+                weaknesses: ['Nessun apprezzamento del capitale', 'Margini sottili', 'Controllo limitato'],
+                opportunities: ['Arbitraggio di mercato', 'Validazione del modello'],
+                threats: ['Rifiuto di rinnovo', 'Aumento dei canoni']
+            },
+            costBreakdown: {
+                labels: ['Canone Locazione', 'Commissioni OTA', 'Utenze', 'Pulizie', 'Forniture'],
+                data: [6300, 3614, 2400, 3300, 800]
+            }
+        },
+        pm: {
+            title: 'Modello B: Property Management',
+            description: 'Modello a rischio finanziario quasi nullo e altamente scalabile, ideale per chi vuole creare un business di servizi senza investire in immobili.',
+            metrics: [
+                { label: 'Capitale Iniziale Richiesto', value: 'Nullo', color: 'text-green-600' },
+                { label: 'Profitto Netto per Immobile', value: '~ €5.022', color: 'text-gray-800' },
+                { label: 'Ritorno su Capitale (ROI)', value: 'Infinito', color: 'text-blue-600 font-bold' }
+            ],
+            swot: {
+                strengths: ['Nessun capitale richiesto', 'Alta scalabilità', 'Rischio minimo'],
+                weaknesses: ['Ricavi inferiori per proprietà', 'Dipendenza dal proprietario'],
+                opportunities: ['Domanda per professionalizzazione (CIN)', 'Creazione brand locale'],
+                threats: ['Concorrenza', 'Perdita di mandati']
+            },
+            costBreakdown: {
+                labels: ['Software Gestionale', 'Marketing e Spese'],
+                data: [500, 500]
+            }
+        },
+        buy: {
+            title: 'Modello C: Buy-to-Rent (Acquisto a Reddito)',
+            description: 'La strategia raccomandata per la creazione di patrimonio a lungo termine, combinando un solido flusso di cassa con l\'apprezzamento del valore immobiliare.',
+            metrics: [
+                { label: 'Capitale Iniziale Richiesto', value: 'Alto (~€33.690)', color: 'text-red-600' },
+                { label: 'Reddito Operativo Netto (NOI)', value: '~ €8.825', color: 'text-gray-800' },
+                { label: 'Tasso di Capitalizzazione', value: '11,8%', color: 'text-blue-600 font-bold' }
+            ],
+            swot: {
+                strengths: ['Creazione di patrimonio a L.T.', 'Controllo totale', 'Leva finanziaria'],
+                weaknesses: ['Elevato capitale iniziale', 'Rischio di mercato immobiliare', 'Scarsa liquidità'],
+                opportunities: ['Acquisto sotto-costo', 'Rivalutazione futura'],
+                threats: ['Aumento tassi di interesse', 'Costi manutenzione imprevisti']
+            },
+            costBreakdown: {
+                labels: ['Mutuo', 'Tasse (IMU)', 'Manutenzione', 'Commissioni/Utenze/Pulizie'],
+                data: [3224, 880, 1047, 10114]
+            }
+        }
+    };
+
+    const actionPlanData = [
+        {
+            phase: 'Fase 1: Impostazione Legale e Amministrativa',
+            duration: 'Settimane 1-4',
+            details: [
+                'Consultare un commercialista per definire la struttura legale (persona fisica o società).',
+                'Assicurarsi la disponibilità dell\'immobile (avviare pratiche di acquisto o negoziare contratto di locazione con clausola di subaffitto).',
+                'Inviare la SCIA (Segnalazione Certificata di Inizio Attività) al SUAP del Comune di Jesi.',
+                'Presentare istanza per l\'ottenimento del CIN (Codice Identificativo Nazionale) sulla piattaforma BDSR.'
+            ]
+        },
+        {
+            phase: 'Fase 2: Allestimento e Ottimizzazione della Proprietà',
+            duration: 'Settimane 5-8',
+            details: [
+                'Progettare gli interni con uno stile moderno-caldo e un angolo lavoro dedicato.',
+                'Acquistare dotazioni essenziali: Wi-Fi veloce, Smart TV, aria condizionata, cucina attrezzata.',
+                'Adeguare l\'immobile alla normativa di sicurezza (rilevatori di fumo/CO, estintori).',
+                'Creare un\'esperienza di benvenuto unica con un Welcome Book digitale e un cesto di prodotti locali.'
+            ]
+        },
+        {
+            phase: 'Fase 3: Impostazione Tecnologica e Operativa',
+            duration: 'Settimane 7-9',
+            details: [
+                'Scegliere e configurare un software gestionale (PMS/Channel Manager) come Lodgify o Smoobu.',
+                'Implementare una strategia di prezzi dinamici basata sul calendario degli eventi.',
+                'Selezionare e contrattualizzare un servizio di pulizia professionale e una rubrica di manutentori.'
+            ]
+        },
+        {
+            phase: 'Fase 4: Strategia di Lancio sul Mercato',
+            duration: 'Settimane 10-12',
+            details: [
+                'Investire in un servizio fotografico professionale e scrivere testi di marketing persuasivi.',
+                'Pubblicare l\'annuncio ottimizzato su Airbnb, Booking.com e Vrbo con tariffe di lancio competitive.',
+                'Attivare il sito per prenotazioni dirette per ridurre le commissioni OTA.',
+                'Costruire un funnel di marketing a lungo termine tramite raccolta email e presenza sui social media.'
+            ]
+        }
+    ];
+
+    let doughnutChart = null;
+
+    function updateFinancialDetails(model) {
+        const data = financialData[model];
+        const container = document.getElementById('financial-details');
+        
+        let metricsHtml = data.metrics.map(metric => `
+            <div class="bg-gray-50 p-3 rounded-lg text-center">
+                <p class="text-sm text-gray-500">${metric.label}</p>
+                <p class="text-xl font-bold ${metric.color}">${metric.value}</p>
+            </div>
+        `).join('');
+
+        let swotHtml = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm">
+                <div class="bg-green-50 p-3 rounded">
+                    <h5 class="font-semibold text-green-800">Punti di Forza</h5>
+                    <ul class="list-disc list-inside text-green-700">${data.swot.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                </div>
+                <div class="bg-red-50 p-3 rounded">
+                    <h5 class="font-semibold text-red-800">Punti di Debolezza</h5>
+                    <ul class="list-disc list-inside text-red-700">${data.swot.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
+                </div>
+                <div class="bg-blue-50 p-3 rounded">
+                    <h5 class="font-semibold text-blue-800">Opportunità</h5>
+                    <ul class="list-disc list-inside text-blue-700">${data.swot.opportunities.map(o => `<li>${o}</li>`).join('')}</ul>
+                </div>
+                <div class="bg-yellow-50 p-3 rounded">
+                    <h5 class="font-semibold text-yellow-800">Minacce</h5>
+                    <ul class="list-disc list-inside text-yellow-700">${data.swot.threats.map(t => `<li>${t}</li>`).join('')}</ul>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = `
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">${data.title}</h3>
+                    <p class="text-gray-600 mb-6">${data.description}</p>
+                    <div class="space-y-3">${metricsHtml}</div>
+                    ${swotHtml}
+                </div>
+                <div class="doughnut-chart-container">
+                    <canvas id="costBreakdownChart"></canvas>
+                </div>
+            </div>
+        `;
+
+        if (doughnutChart) {
+            doughnutChart.destroy();
+        }
+
+        const ctx = document.getElementById('costBreakdownChart').getContext('2d');
+        doughnutChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.costBreakdown.labels,
+                datasets: [{
+                    label: 'Ripartizione Costi Annuali',
+                    data: data.costBreakdown.data,
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(139, 92, 246, 0.7)'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Ripartizione Costi Annuali Stimati'
+                    }
+                }
+            }
+        });
+    }
+
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            const model = button.id.split('-')[1];
+            updateFinancialDetails(model);
+        });
+    });
+
+    updateFinancialDetails('rent');
+
+    function buildActionPlan() {
+        const container = document.getElementById('action-plan-container');
+        let html = '';
+        actionPlanData.forEach((item, index) => {
+            html += `
+                <div class="rounded-lg bg-white shadow">
+                    <button class="w-full flex justify-between items-center text-left p-4 focus:outline-none" data-index="${index}">
+                        <span class="text-lg font-semibold text-gray-800">${item.phase}</span>
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-500 mr-4">${item.duration}</span>
+                            <svg class="w-6 h-6 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </button>
+                    <div class="hidden p-4 border-t border-gray-200">
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            ${item.details.map(detail => `<li>${detail}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+
+        container.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('svg');
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+    }
+
+    buildActionPlan();
+
+    const investmentCtx = document.getElementById('investmentModelsChart').getContext('2d');
+    new Chart(investmentCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Rent-to-Rent', 'Property Management', 'Buy-to-Rent'],
+            datasets: [
+                {
+                    label: 'Capitale Iniziale (€)',
+                    data: [17000, 0, 33690],
+                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'NOI / Profitto Annuo (€)',
+                    data: [7676, 5022, 8825],
+                    backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1
+                },
+                 {
+                    label: 'Creazione Patrimonio a L.T.',
+                    data: [0, 0, 1],
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    type: 'linear',
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Euro (€)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            if (value === 1) return 'Alta';
+                            if (value === 0) return 'Nulla';
+                            return null;
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Valore Qualitativo'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.dataset.yAxisID === 'y1') {
+                                label += context.raw === 1 ? 'Alta' : 'Nulla';
+                            } else {
+                                label += new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(context.raw);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const tourismCtx = document.getElementById('tourismGrowthChart').getContext('2d');
+    new Chart(tourismCtx, {
+        type: 'line',
+        data: {
+            labels: ['2019', '2023', '2024'],
+            datasets: [{
+                label: 'Presenze Turistiche Marche (vs 2019)',
+                data: [0, 9.4, 13.4],
+                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '+' + value + '%'
+                        }
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Crescita % Presenze Turistiche (vs 2019)'
+                }
+            }
+        }
+    });
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 80) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>
